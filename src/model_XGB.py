@@ -111,7 +111,16 @@ class BDT_model:
         self._best_features = feature_indices
         
     def plot_F_scores(self):
-        # For investagative purposes and debugging
+        """
+        Plots F scores in a bar plot after feature selection (for investigative
+        purposes).
+
+        Returns
+        -------
+        None.
+
+        """
+        # For investigative purposes and debugging
         plt.bar([i for i in range(len(self._F_scores))], self._F_scores)
         plt.show()
         

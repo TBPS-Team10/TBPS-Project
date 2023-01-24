@@ -2,7 +2,6 @@
 """
 Created on Sun Jan 22 16:06:48 2023
 
-Set the working directory as the folder containing all the .csv sample files.
 This script will probably take over an hour to run and may need roughly
 1.5 GB of available RAM at peak (the script will crash if it isn't available!).
 
@@ -13,6 +12,7 @@ import numpy as np
 import pandas as pd
 import model_XGB
 
+# These filenames specify the order of the classification from 0 to 11—important!
 filenames = ["sig.csv", "jpsi.csv", "Jpsi_Kstarp_pi0.csv", "jpsi_mu_k_swap.csv",\
              "jpsi_mu_pi_swap.csv", "k_pi_swap.csv", "Kmumu.csv", "Kstarp_pi0.csv",\
              "phimumu.csv", "pKmumu_piTok_kTop.csv", "pKmumu_piTop.csv",\
@@ -43,7 +43,7 @@ del data  # Free up some RAM (can be significant)
 
 # Literally take one (the smallest one) just to get a list of variable names
 # if you need them
-variables = pd.read_csv("./data/jpsi_mu_pi_swap.csv")
+variables = pd.read_csv("jpsi_mu_pi_swap.csv")
 variables = list(variables.columns)
 
 # Combine into 32-bit arrays for use in ML
@@ -69,4 +69,4 @@ print("B0 event accuracy = %.2f percent" % (B0_accuracy))
 
 # Save the model for use elsewhere; change the name to whatever is needed.
 # Don't overwrite models you don't want to lose!
-bdt_model.save_model("model_depth_3_estimators_200_features_10.json")
+bdt_model.save_model("model_depth_3_estimators_200_features_30.json")
