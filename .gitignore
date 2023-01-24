@@ -130,8 +130,4 @@ dmypy.json
 .pyre/
 
 # Data directories
-<<<<<<< HEAD
-data/
-=======
 data/*.csv
->>>>>>> 11d7652bda47cfa7c5deedd1ddf0a148c1de5c9a
