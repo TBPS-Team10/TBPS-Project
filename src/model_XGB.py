@@ -108,7 +108,7 @@ class BDT_model:
         None.
 
         """
-        self._best_features = feature_indices
+        self._best_features = feature_indices[:self._num_features]
         
     def plot_F_scores(self):
         """
