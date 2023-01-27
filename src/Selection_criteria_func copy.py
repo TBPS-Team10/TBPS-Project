@@ -137,5 +137,5 @@ def select(df):
     cut_K_mass(df)
     cut_sep_vertex(df)
     cut_dira(df)
-    for row in df.index:
-        normalize_df(df, row)
+    #for row in df.index:
+        #normalize_df(df, row)
