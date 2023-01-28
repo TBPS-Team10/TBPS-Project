@@ -12,7 +12,4 @@ def parkinson_filter(data):
             data.drop(i, axis = 0, inplace = True)
     data.reset_index(inplace = True)
 data = parkinson_mass_filter(data)
-print(data)
-
-
 
