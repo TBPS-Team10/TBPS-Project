@@ -2,11 +2,11 @@ import pandas as pd
 from tqdm import tqdm
 
 if __name__ == "__main__":
-    df = pd.read_csv("./data/total_dataset.csv")
+    df = pd.read_csv("../data/total_dataset.csv")
 
 def parkinson_filter(data):
     k_star = df['Kstar_M']
-    B0 = df[B0_M]
+    B0 = df['B0_M']
     
     for i in tqdm(range(0,len(k_star)-1)):
         
