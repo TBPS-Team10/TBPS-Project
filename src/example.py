@@ -1,6 +1,6 @@
 import pandas as pd
+from pathlib import Path
 
 if __name__ == "__main__":
-    # This is how you can load data from the data directory, note the '.' leading the file path. 
-    # This is used to navigate one directory higher, out of the src/ directory and into the root.
-    df = pd.read_csv("./data/total_dataset.csv")
+    df = pd.read_csv("../data/total_dataset.csv") # "../" has been used to go up one directory
+    print(df)
