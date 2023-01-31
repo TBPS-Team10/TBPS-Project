@@ -31,10 +31,9 @@ X_test = []
 y_test_true = []  # Actual values; used for testing accuracy
 
 # Load in the files
-DATADIR = Path(__file__).parent.parent / 'data' # Define data directory using pathlib
 for i, name in enumerate(filenames):
     # Load as float32 to save RAM
-    data = np.loadtxt(DATADIR / name, dtype="float32", delimiter=",", skiprows=1)
+    data = np.loadtxt("../data/" + name, dtype="float32", delimiter=",", skiprows=1)
     samples = len(data)
     X_train.append(data[:samples//2])
     y_train.append(np.ones(samples//2).astype("int32") * i)
@@ -45,7 +44,7 @@ del data  # Free up some RAM (can be significant)
 
 # Literally take one (the smallest one) just to get a list of variable names
 # if you need them
-variables = pd.read_csv(DATADIR / "jpsi_mu_pi_swap.csv")
+variables = pd.read_csv("../data/" + "jpsi_mu_pi_swap.csv")
 variables = list(variables.columns)
 
 # Combine into 32-bit arrays for use in ML
