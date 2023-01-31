@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
 #%% load tthe sig data file to test 
-data_sig=pd.read_csv('data/sig.csv',delimiter=',')
+data_sig=pd.read_csv('../data/sig.csv',delimiter=',')
 #%%
 c=3e8
 particles=['mu_plus','mu_minus','K','Pi']

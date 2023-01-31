@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
 #%%
-data_sig=pd.read_csv('data/sig.csv',delimiter=',')
+data_sig=pd.read_csv('../data/sig.csv',delimiter=',')
 
 #%%
 
@@ -98,7 +98,7 @@ print(len(total_filtered_data.axes[0]))
 
 #%% total dataset
 
-data_tot=pd.read_csv('data/total_dataset.csv',delimiter=',')
+data_tot=pd.read_csv('../data/total_dataset.csv',delimiter=',')
 bins=200
 B_filtered_data=B_meson_filter_conditions(data_tot)
 mu_filtered_data=muon_filter_conditions(data_tot)
