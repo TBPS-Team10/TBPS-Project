@@ -1,7 +1,7 @@
 # TBPS Project
 
 ## Project Structure
-This repository is structured with the source (Python) files in the `src/` directory and the data files downloaded from Box should be stored in `data/`. The working directory should be the source directory, which will be the default if you are using Spyder. This means that to load data, you must first exit the source directory to access the data directory. This can be achieved with the following code
+This repository is structured with the source (Python) files in the `src/` directory, the data files downloaded from Box should be stored in `data/` and any plots should be saved in `plots/`. The working directory should be the source directory, which will be the default if you are using Spyder. This means that to load data, you must first exit the source directory to access the data directory. This can be achieved with the following code
 
 `df = pd.read_csv("../data/total_dataset.csv")`
 
