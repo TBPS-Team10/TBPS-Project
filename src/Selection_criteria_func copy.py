@@ -136,6 +136,17 @@ def cut_mom(df):
     cut_momX(df)
     cut_momY(df)
     cut_momZ(df)
+
+po = [403.67914507, 896.71732264,  26.35192252]
+
+def cut_Kmumu(df):
+    mean = po[1]
+    sigma = po[2]
+    lower_range = mean-(3*sigma)
+    upper_range = mean+(3*sigma)
+    df.drop(df[(df['Kstar_M'] < lower_range)].index, inplace=True)
+    df.drop(df[(df['Kstar_M'] > upper_range)].index, inplace=True)
+
     
 #Combining all filtering functions above 
 def select(df):
@@ -152,3 +163,4 @@ def select(df):
     cut_mom(df)
     cut_dira(df)
     cut_prob(df)
+    cut_Kmumu(df)
