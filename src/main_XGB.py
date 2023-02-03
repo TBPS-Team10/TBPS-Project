@@ -14,9 +14,9 @@ from pathlib import Path
 import model_XGB
 
 # These filenames specify the order of the classification from 0 to 11—important!
-filenames = ["sig.csv", "jpsi.csv", "Jpsi_Kstarp_pi0.csv", "jpsi_mu_k_swap.csv",\
-             "jpsi_mu_pi_swap.csv", "k_pi_swap.csv", "Kmumu.csv", "Kstarp_pi0.csv",\
-             "phimumu.csv", "pKmumu_piTok_kTop.csv", "pKmumu_piTop.csv",\
+filenames = ["sig.csv", "jpsi.csv", "Jpsi_Kstarp_pi0.csv", "jpsi_mu_k_swap.csv",
+             "jpsi_mu_pi_swap.csv", "k_pi_swap.csv", "Kmumu.csv", "Kstarp_pi0.csv",
+             "phimumu.csv", "pKmumu_piTok_kTop.csv", "pKmumu_piTop.csv",
              "psi2s.csv"]
 
 # Data stored as 32-bit floats to save RAM. ML processes everything in 32-bit, anyway.

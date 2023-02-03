@@ -15,9 +15,9 @@ import random
 warnings.filterwarnings('ignore')
 from GNB_class import *
 
-filenames = ["sig.csv", "jpsi.csv", "Jpsi_Kstarp_pi0.csv", "jpsi_mu_k_swap.csv",\
-             "jpsi_mu_pi_swap.csv", "k_pi_swap.csv", "Kmumu.csv", "Kstarp_pi0.csv",\
-             "phimumu.csv", "pKmumu_piTok_kTop.csv", "pKmumu_piTop.csv",\
+filenames = ["sig.csv", "jpsi.csv", "Jpsi_Kstarp_pi0.csv", "jpsi_mu_k_swap.csv",
+             "jpsi_mu_pi_swap.csv", "k_pi_swap.csv", "Kmumu.csv", "Kstarp_pi0.csv",
+             "phimumu.csv", "pKmumu_piTok_kTop.csv", "pKmumu_piTop.csv",
              "psi2s.csv"]
     
 #%%
@@ -36,9 +36,3 @@ for i in range(len(filenames)):
 nba = NBA_fit(train_df)
 #%%
 predictions = predict(df, nba)                                                     
-
-    
-    
-    
-    
-    
