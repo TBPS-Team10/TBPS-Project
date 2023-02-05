@@ -152,7 +152,7 @@ def cut_Kmumu(df):
 def select(df):
     cut_small_theta_sep(df)
     cut_q2(df)
-    cut_B0_M(df)
+    #cut_B0_M(df)
     cut_IP_chisq(df)
     cut_K_mass(df)
     cut_pik(df)
@@ -160,7 +160,7 @@ def select(df):
     cut_phimumu(df)
     cut_kpi(df)
     cut_sep_vertex(df)
-    cut_mom(df)
+    #cut_mom(df)
     cut_dira(df)
     cut_prob(df)
     cut_Kmumu(df)
