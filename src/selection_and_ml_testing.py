@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import model_XGB
 import pandas as pd
-import Selection_criteria_func
+import filtering.Selection_criteria_func
 from scipy.optimize import curve_fit
 #%%
 variables = pd.read_csv('../data/total_dataset.csv')

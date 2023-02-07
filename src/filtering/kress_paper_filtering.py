@@ -9,8 +9,6 @@ Created on Sun Jan 29 17:37:20 2023
 import pandas as pd
 from tqdm import tqdm
 
-df = pd.read_csv("../data/total_dataset.csv")
-
 def kress_filter(data):
     K_STAR_M = df['Kstar_M']
     B0_M = df['B0_M']
@@ -34,7 +32,9 @@ def kress_filter(data):
         
         if K_STAR_0_FDCHI2[i] < 9:
             df.drop(i, axis = 0, inplace = True)
-         
-df.reset_index(inplace = True)
 
-print(kress_filter(df))
+if __name__ == "__main__":
+    df = pd.read_csv("../data/total_dataset.csv")
+    df.reset_index(inplace = True)
+
+    print(kress_filter(df))
