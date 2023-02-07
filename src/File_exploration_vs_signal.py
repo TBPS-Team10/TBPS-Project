@@ -5,7 +5,6 @@
 
 #Instructions:
 #1. Put your file name into the kmumu = [] (on line 24 above signal)
-#2. Change your filepath
 #3. Go to line 86 and change and replace 'Kstarp_pi0' with your filename for the label
 #4. Go to line 87 and change and replace 'Kstarp_pi0' with your filename for the set title
 #5. Go to line 111 and change and replace 'Kstarp_pi0' with your filename for the label
@@ -32,7 +31,7 @@ kmumu = ["Kstarp_pi0.csv"] # "Kstarp_pi0.csv"
 signal = ["sig.csv"]
 
 
-path = r"C:/Users/Toshiba/Desktop/Regen/TBPS/TBPS - Spring 2023/Data/"  # please change to your own filepath  
+path = "../data/"  # Uses relative file path, please run from the "src" directory
 # Load in the files
 
 

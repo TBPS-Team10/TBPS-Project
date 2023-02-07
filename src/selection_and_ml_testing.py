@@ -13,7 +13,7 @@ import pandas as pd
 import Selection_criteria_func
 from scipy.optimize import curve_fit
 #%%
-variables = pd.read_csv('data/total_dataset.csv')
+variables = pd.read_csv('../data/total_dataset.csv')
 variables = list(variables.columns)
 
 bdt_model = BDT_model()
@@ -21,7 +21,7 @@ bdt_model.load_model('model_depth_3_estimators_200_features_20.json')
 bdt_model.specify_feature_num(20)
 feature_list = np.loadtxt('30_features.txt', delimiter = ',', dtype = 'int32')
 bdt_model.specify_features(feature_list)
-total_dataset = np.loadtxt('data/total_dataset.csv', delimiter = ',', skiprows = 1)
+total_dataset = np.loadtxt('../data/total_dataset.csv', delimiter = ',', skiprows = 1)
 signal = np.loadtxt('data/sig.csv', delimiter = ',', skiprows = 1)
 #%%
 test_sig = bdt_model.predict(signal)
@@ -47,7 +47,7 @@ plt.hist(df_total['B0_M'], bins = 100)
 #%%
 plt.hist(clean_total_dataset_ML [:,56], bins = np.linspace(5170,5700,50), density=True, histtype='step', alpha = 0.5,label='after ML')
 plt.hist(df_total['B0_M'], bins = np.linspace(5170,5700,50), density=True, histtype='step', alpha = 0.5,label='after ML + filter')
-plt.hist(pd.read_csv('data/total_dataset.csv')['B0_M'], bins = np.linspace(5170,5700,50), density=True, histtype='step', alpha = 0.5,label='Total dataset')
+plt.hist(pd.read_csv('../data/total_dataset.csv')['B0_M'], bins = np.linspace(5170,5700,50), density=True, histtype='step', alpha = 0.5,label='Total dataset')
 
 plt.legend()
 #%%

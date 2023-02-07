@@ -28,7 +28,7 @@ import math
 filenames = ["Sig.csv"] # "Kstarp_pi0.csv"
 
 
-path = r"Data/"  # please change to your own filepath  
+path = "../data/"  # please change to your own filepath  
 # Load in the files
 
 
@@ -225,7 +225,7 @@ def exponetial_exploration(data,col):
 
 
 #manual reading in of data
-kmumu_data = pd.read_csv(r"Data/Kmumu.csv", on_bad_lines='skip')
+kmumu_data = pd.read_csv("../data/Kmumu.csv", on_bad_lines='skip')
 
 test_col ='q2'
 # get data
