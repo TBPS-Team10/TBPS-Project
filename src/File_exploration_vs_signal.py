@@ -3,6 +3,15 @@
 
 # In[ ]:
 
+#Instructions:
+#1. Put your file name into the kmumu = [] (on line 24 above signal)
+#2. Change your filepath
+#3. Go to line 86 and change and replace 'Kstarp_pi0' with your filename for the label
+#4. Go to line 87 and change and replace 'Kstarp_pi0' with your filename for the set title
+#5. Go to line 111 and change and replace 'Kstarp_pi0' with your filename for the label
+#6 . Go to line 112 and change and replace 'Kstarp_pi0' with your filename for the set title
+#7. Run file and interpret plots
+#8. Update the onenote with your results
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -102,7 +111,7 @@ for col in important_variables:
     #Comparison plots
     f, (ax3) = plt.subplots(1, 1, layout ='tight')
     ax3.hist(df_signal[col].values, bins=bins_1, alpha=0.8, color='red',label= ('signal: '+col))
-    ax3.hist( df_kmumu[col].values,bins=bins_2, alpha=0.8, color='blue',label=('kmumu: '+col))
+    ax3.hist( df_kmumu[col].values,bins=bins_2, alpha=0.8, color='blue',label=('Kstarp_pi0: '+col))
     ax3.set_title('Signal vs Kstarp_pi0 comparison '+ str(col))
     ax3.legend()
 
