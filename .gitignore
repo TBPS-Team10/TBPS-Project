@@ -264,3 +264,6 @@ dmypy.json
 
 # Data directories
 data/*.csv
+
+# MacOS DS Store
+.DS_Store
