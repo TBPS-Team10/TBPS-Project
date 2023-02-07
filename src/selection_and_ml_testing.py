@@ -8,8 +8,8 @@ Created on Thu Jan 26 14:21:02 2023
 
 import matplotlib.pyplot as plt
 import numpy as np
+import model_XGB
 import pandas as pd
-from ml.model_XGB import BDT_model
 import filtering.Selection_criteria_func
 from scipy.optimize import curve_fit
 #%%
