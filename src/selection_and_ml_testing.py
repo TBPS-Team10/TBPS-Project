@@ -4,25 +4,27 @@
 Created on Thu Jan 26 14:21:02 2023
 
 @author: aisulu
+
+pip install: xgboost, iminuit, mpl_scatter_density
 """
 
 import matplotlib.pyplot as plt
 import numpy as np
+from ml.model_XGB import *
 import pandas as pd
-from ml.model_XGB import BDT_model
-import filtering.Selection_criteria_func
+from filtering.Selection_criteria_func import *
 from scipy.optimize import curve_fit
 #%%
 variables = pd.read_csv('../data/total_dataset.csv')
 variables = list(variables.columns)
 
 bdt_model = BDT_model()
-bdt_model.load_model('model_depth_3_estimators_200_features_20.json')
+bdt_model.load_model('ml/model_depth_3_estimators_200_features_20.json')
 bdt_model.specify_feature_num(20)
-feature_list = np.loadtxt('30_features.txt', delimiter = ',', dtype = 'int32')
+feature_list = np.loadtxt('ml/30_features.txt', delimiter = ',', dtype = 'int32')
 bdt_model.specify_features(feature_list)
 total_dataset = np.loadtxt('../data/total_dataset.csv', delimiter = ',', skiprows = 1)
-signal = np.loadtxt('data/sig.csv', delimiter = ',', skiprows = 1)
+signal = np.loadtxt('../data/sig.csv', delimiter = ',', skiprows = 1)
 #%%
 test_sig = bdt_model.predict(signal)
 plt.hist(test_sig)
