@@ -5,10 +5,10 @@
 
 #Instructions:
 #1. Put your file name into the kmumu = [] (on line 24 above signal)
-#3. Go to line 86 and change and replace 'Kstarp_pi0' with your filename for the label
-#4. Go to line 87 and change and replace 'Kstarp_pi0' with your filename for the set title
-#5. Go to line 111 and change and replace 'Kstarp_pi0' with your filename for the label
-#6 . Go to line 112 and change and replace 'Kstarp_pi0' with your filename for the set title
+#3. Go to line 89 and change and replace 'Kstarp_pi0' with your filename for the label
+#4. Go to line 90 and change and replace 'Kstarp_pi0' with your filename for the set title
+#5. Go to line 112 and change and replace 'Kstarp_pi0' with your filename for the label
+#6 . Go to line 113 and change and replace 'Kstarp_pi0' with your filename for the set title
 #7. Run file and interpret plots
 #8. Update the onenote with your results
 
@@ -75,7 +75,6 @@ for col in important_variables:
     min_value_1 = min(df_signal[col].values) #Get minimum value 
     max_value_1 = max(df_signal[col].values) #Get maximum value
     bins_1 = np.linspace(min_value_1, max_value_1, n_bins) #Create bins of equal size between min_value and max_value
-    #
     min_value_2 = min(df_kmumu[col].values)#Get minimum value 
     max_value_2 = max(df_kmumu[col].values) #Get maximum value of column pairs
     bins_2 = np.linspace(min_value_2, max_value_2, n_bins) #Create bins of equal size between min_value and max_value

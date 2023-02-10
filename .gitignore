@@ -397,3 +397,6 @@ data/*.csv
 
 # MacOS DS Store
 .DS_Store
+
+# Vscode files
+.vscode
