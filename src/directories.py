@@ -16,8 +16,10 @@ except NameError:
     if not this_file.exists():
         print("""
         ############################################################################
-                                        WARNING
-        You are using an interactive environment - Make sure your working directory
+                        WARNING: Working directory incorrect
+        Fix this: https://github.com/TBPS-Team10/TBPS-Project/blob/main/resources/Spyder_set_working_directory.png
+        
+        Make sure your working directory
         is set to the source directory (C:/Path/To/TBPS-Project/src on Windows).
 
         If you are using Spyder, you must also set the "Run" button to obey the 
