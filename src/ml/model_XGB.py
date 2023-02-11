@@ -229,3 +229,20 @@ class BDT_model:
         """
         self._bdt = xgboost.XGBClassifier()
         self._bdt.load_model(filename)
+        
+    def save_features(self, filename):
+        """
+        Saves a list of the best features for a given model with a given
+        file name. Should be run only after performing a feature selection.
+
+        Parameters
+        ----------
+        filename : string
+            File name, with extension (.txt, .csv).
+
+        Returns
+        -------
+        None.
+
+        """
+        np.savetxt(filename, self._best_features, delimiter=",")
