@@ -9,13 +9,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import Selection_criteria_func #need the filtering file in the same directory
 from scipy.optimize import curve_fit
+import Outlier_removal
 #%% this cell filters the data using Aisulu filter only
 # add any additional file names you wish to use. Not using jpsi and psi2S as assuming they are already fully filtered out
 filenames = ["Jpsi_Kstarp_pi0.csv", "jpsi_mu_k_swap.csv",
              "jpsi_mu_pi_swap.csv", "k_pi_swap.csv", "Kmumu.csv", "Kstarp_pi0.csv",
-             "phimumu.csv", "pKmumu_piTok_kTop.csv", "pKmumu_piTop.csv",]
+             "phimumu.csv", "pKmumu_piTok_kTop.csv", "pKmumu_piTop.csv"]
+#keeping correct order is important
 
-
+#%% using aisulu's filter, only choose one of the filtering cells
 for name in filenames:
     data = pd.read_csv(f"data/{name}", delimiter=",") #load datafile, add ./data if required 
     print('initial length',len(data))
@@ -28,6 +30,17 @@ for name in filenames:
 
 print('the length of the combined filtered simulated datasets is:',len(tot_filtered_data))
     
+#%% using avi's outlier filter
+
+for name in filenames:
+    data=Outlier_removal.filter_events('data/sig.csv',f"data/{name}")
+    print('length after A filter',len(data))
+    if name=="Jpsi_Kstarp_pi0.csv":
+        tot_filtered_data=data
+    else:
+        tot_filtered_data=pd.concat([tot_filtered_data,data],ignore_index=True)
+
+print('the length of the combined filtered simulated datasets is:',len(tot_filtered_data))
 
    
 
@@ -56,7 +69,7 @@ plt.title(r'$cos\theta_L$ for signal and filtered simulated data')
 
 plt.subplot(2,2,3)
 plt.hist(sig['costhetak'],alpha=0.8,color='blue',label='signal data',bins=50,density=True)
-plt.hist(tot_filtered_data['costhetal'],alpha=0.5,color='red',label='simulated filtered data',bins=50,density=True)
+plt.hist(tot_filtered_data['costhetak'],alpha=0.5,color='red',label='simulated filtered data',bins=50,density=True)
 plt.legend()
 plt.xlabel(r'$cos\theta_k$')
 plt.ylabel('frequency')
@@ -259,7 +272,16 @@ def make_fit_Chebyshev(angle_data,max_order):
     
     return fit_params, cov_params, fit_dat, res_val
 
-
+def make_fit_exponential(angle_data):
+    freq,bin_edges=np.histogram(angle_data,bins=20,density=True)
+    x_dat=bin_mid(bin_edges)
+    #starting with a flat initial guess and praying for the best
+    initial_guess=0.2*np.ones(3)
+    fit_params,cov_params=curve_fit(fit_exponential,x_dat,freq,p0=initial_guess)
+    fit_dat=fit_exponential(x_dat,*fit_params)
+    res_val=find_residuals(freq,fit_dat)
+    
+    return fit_params, cov_params, fit_dat, res_val
 
 def find_best_fit(angle_data,max_order):
     best_fit_params=0
@@ -277,29 +299,30 @@ def find_best_fit(angle_data,max_order):
             best_res_val=res_val
             best_order=i
     
+    fit_params_exp, cov_params_exp, fit_dat_exp, res_val_exp=make_fit_exponential(angle_data)
+    if res_val_exp<res_val:
+        best_fit_params=fit_params_exp
+        best_cov_params=cov_params_exp
+        best_fit_dat=fit_dat_exp
+        best_res_val=res_val_exp
+        best_order=1000 #the exponential is the best will be called 1000
+    
+    
+    
     return best_fit_params, best_cov_params, fit_dat, best_res_val, best_order
 
-def make_fit_exponential(angle_data):
-    freq,bin_edges=np.histogram(angle_data,bins=20,density=True)
-    x_dat=bin_mid(bin_edges)
-    #starting with a flat initial guess and praying for the best
-    initial_guess=0.2*np.ones(3)
-    fit_params,cov_params=curve_fit(fit_exponential,x_dat,freq,p0=initial_guess)
-    fit_dat=fit_exponential(x_dat,*fit_params)
-    res_val=find_residuals(freq,fit_dat)
-    
-    return fit_params, cov_params, fit_dat, res_val
+
 
 def make_all_fits(bin_dat,q2bin_num,max_order):
     cosl_vals=find_best_fit(np.array(bin_dat['costhetal']),max_order)
-    cosk_vals=make_fit_exponential(np.array(bin_dat['costhetak']))
+    cosk_vals=find_best_fit(np.array(bin_dat['costhetak']),max_order)
     phi_vals=find_best_fit(np.array(bin_dat['phi']),max_order)
     
     plt.figure(q2bin_num)
     plt.subplot(1,3,1)
     plot_fit(bin_dat['costhetal'],cosl_vals[2],20,angular_variable=r'cos$\theta_l$')
     plt.subplot(1,3,2)
-    plot_fit(bin_dat['costhetak'],cosk_vals[2],20)
+    plot_fit(bin_dat['costhetak'],cosk_vals[2],20,angular_variable=r'cos$\theta_k$)')
     plt.subplot(1,3,3)
     plot_fit(bin_dat['phi'],phi_vals[2],20,angular_variable=r'$\Phi$')
     plt.suptitle(f'background fit for bin {q2bin_num}',fontweight='bold')
