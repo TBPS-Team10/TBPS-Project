@@ -12,7 +12,7 @@ from scipy.special import eval_legendre
 from copy import deepcopy
 
 class acceptance_legendre:
-    def __init__(self, filtered_data, q2_bins, order_costhetal=8, order_costhetak=8, order_phi=8):
+    def __init__(self, filtered_data, q2_bins, order_costhetal=5, order_costhetak=5, order_phi=6):
         """
         3D Legendre decompositions of the acceptance function, parameterized in
         the 3 angular variables (phi will be rescaled into the interval [-1, 1])
@@ -23,13 +23,13 @@ class acceptance_legendre:
         filtered_data : ndarray of float
             2D array of filtered acceptance_mc.csv data (acceptance function).
         q2_bins : array-like (2D)
-            List/array of lists/arrays containing q^2 bin interval edges.
+            List/array of lists/arrays containing q^2 interval edges.
         order_costhetal : int
-            Legendre expansion order in cos(theta_l). The default is 8.
+            Legendre expansion order in cos(theta_l). The default is 5.
         order_costhetak : int
-            Legendre expansion order in cos(theta_k). The default is 8.
+            Legendre expansion order in cos(theta_k). The default is 5.
         order_phi : int
-            Legendre expansion order in phi. The default is 8.
+            Legendre expansion order in phi. The default is 6.
 
         Returns
         -------
@@ -192,6 +192,26 @@ class acceptance_legendre:
             
         return expansion / np.mean(expansion)
     
+    def acceptance_func(self, bin_num, cos_l, cos_k, phi):
+        # Acquire Legendre expansion acceptance function values
+        # 3D array of coefficients
+        coeffs = self._coeffs[bin_num]
+        # cos_l, cos_k and phi should all have the same length
+        expansion = np.zeros(len(cos_l))
+        
+        for i in range(self._o_cosl + 1):
+            legendre_cos_l = eval_legendre(i, cos_l)
+            for j in range(self._o_cosk + 1):
+                legendre_cos_k = eval_legendre(j, cos_k)
+                for k in range(self._o_phi + 1):
+                    # Divide by pi to transform to the range [-1, 1]
+                    legendre_phi = eval_legendre(k, phi / np.pi)
+                    expansion += coeffs[i,j,k] * legendre_cos_l * legendre_cos_k *\
+                        legendre_phi
+        
+        # Return with a mean of 1 for convenience
+        return expansion / np.mean(expansion)
+    
     def plot_acceptance_cosl(self, bin_num):
         """
         Plot acceptance function for a particular bin in terms of cos(theta_l).
@@ -267,26 +287,6 @@ class acceptance_legendre:
         plt.ylabel("Acceptance function / 2")
         plt.grid()
         plt.show()
-        
-    def acceptance_func(self, bin_num, cos_l, cos_k, phi):
-        # Acquire Legendre expansion coefficients for the given bin
-        # 3D array of coefficients
-        coeffs = self._coeffs[bin_num]
-        # cos_l, cos_k and phi should all have the same length
-        expansion = np.zeros(len(cos_l))
-        
-        for i in range(self._o_cosl + 1):
-            legendre_cos_l = eval_legendre(i, cos_l)
-            for j in range(self._o_cosk + 1):
-                legendre_cos_k = eval_legendre(j, cos_k)
-                for k in range(self._o_phi + 1):
-                    # Divide by pi to transform to the range [-1, 1]
-                    legendre_phi = eval_legendre(k, phi / np.pi)
-                    expansion += coeffs[i,j,k] * legendre_cos_l * legendre_cos_k *\
-                        legendre_phi
-        
-        # Return with a mean of 1 for convenience
-        return expansion / np.mean(expansion)
     
     def plot_acceptance_phi(self, bin_num):
         """
@@ -322,11 +322,29 @@ class acceptance_legendre:
         plt.hist(q_filtered[:,91], bins=50, range=[-1., 1.], color="orange", alpha=0.5, density=True)
         plt.plot(x, expansion, color="blue")
         plt.xlabel(r"$\phi/\pi$")
-        plt.ylabel("Acceptance function / 2")
+        plt.ylabel("Acceptance function")
         plt.grid()
         plt.show()
         
     def fit_cos_l_func(self, data, bin_num):
+        """
+        Fits the 1D PDF given at the start of the project in a given bin.
+        Exists largely for debug purposes; may be better to use
+        fit_SM_observables().
+
+        Parameters
+        ----------
+        data : ndarray
+            Filtered signal data.
+        bin_num : int
+            Bin number (index) to fit in.
+
+        Returns
+        -------
+        list
+            List of F_L, A_FB and associated estimated errors from iminuit.
+
+        """
         q_min = self._q2_bins[bin_num][0]
         q_max = self._q2_bins[bin_num][1]
         q_filtered = data[q_min < data[:,90]]
@@ -345,7 +363,7 @@ class acceptance_legendre:
         
         cos_l_func_NLL.errordef = Minuit.LIKELIHOOD
         minimizer = Minuit(cos_l_func_NLL, F_L = 0.3, A_FB = 0.)
-        minimizer.limits=((-1., 1.), (-1., 1.))
+        minimizer.limits=((-3., 3.), (-1., 1.))
         minimizer.migrad()
         minimizer.hesse()
         
@@ -355,9 +373,12 @@ class acceptance_legendre:
         A_FB = minimizer.values[1]
         A_FB_error = minimizer.errors[1]
         
+        print("Valid function minumum: " + str(minimizer.fmin.is_valid))
+        
         # Reassign to this for the sake of plotting the fit
         cos_l = np.linspace(-1., 1., 200)
         
+        """
         plt.title(r"Bin %.i ($F_{L}=%.2f$, $A_{FB}=%.2f$)" % (bin_num, F_L, A_FB))
         plt.hist(q_filtered[:,92], bins=25, range=[-1., 1.], density="True", color="orange", alpha=0.5)
         plt.plot(cos_l, cos_l_func(F_L, A_FB)*self.acceptance_func_cosl(bin_num, np.linspace(-1., 1., 200)), color="blue")
@@ -365,10 +386,27 @@ class acceptance_legendre:
         plt.ylabel("Normalized candidate distribution")
         plt.grid(True)
         plt.show()
+        """
         
         return [F_L, F_L_error, A_FB, A_FB_error]
     
     def fit_SM_observables(self, data, bin_num):
+        """
+        Fits the 3D PDF (see literature) for a given bin with an NLL minimizer.
+
+        Parameters
+        ----------
+        data : ndarray
+            Filtered signal data.
+        bin_num : int
+            Bin number (index) to fit in.
+
+        Returns
+        -------
+        ndarray
+            Array of SM parameters with estimated errors from iminuit minimizer.
+
+        """
         q_min = self._q2_bins[bin_num][0]
         q_max = self._q2_bins[bin_num][1]
         q_filtered = data[q_min < data[:,90]]
@@ -400,7 +438,7 @@ class acceptance_legendre:
         sin_phi = np.sin(phi)
         sin_2phi = np.sin(2. * phi)
         
-        # Yes, functions inside functions inside classes.
+        # Yes, functions inside functions inside classes...
         def PDF(F_L, A_FB, S3, S4, S5, S7, S8, S9):
             func_vals = 0.75 * (1. - F_L) * sin_squared_k
             func_vals += F_L * cos_squared_k
