@@ -6,6 +6,7 @@ Created on Fri Jan 27 19:02:31 2023
 """
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from iminuit import Minuit
 from scipy.special import eval_legendre
@@ -194,7 +195,7 @@ class acceptance_legendre:
     
     def acceptance_func(self, bin_num, cos_l, cos_k, phi):
         # Acquire Legendre expansion acceptance function values
-        # 3D array of coefficients
+        # 3D array of coefficients for the given bin number
         coeffs = self._coeffs[bin_num]
         # cos_l, cos_k and phi should all have the same length
         expansion = np.zeros(len(cos_l))
@@ -329,8 +330,8 @@ class acceptance_legendre:
     def fit_cos_l_func(self, data, bin_num):
         """
         Fits the 1D PDF given at the start of the project in a given bin.
-        Exists largely for debug purposes; may be better to use
-        fit_SM_observables().
+        Not recommended—use fit_SM_observables_bootstrap() instead. This
+        function is kept largely for documentation purposes.
 
         Parameters
         ----------
@@ -393,6 +394,8 @@ class acceptance_legendre:
     def fit_SM_observables(self, data, bin_num):
         """
         Fits the 3D PDF (see literature) for a given bin with an NLL minimizer.
+        Not recommended—use fit_SM_observables_bootstrap() instead. This
+        function is kept largely for documentation purposes.
 
         Parameters
         ----------
@@ -491,3 +494,215 @@ class acceptance_legendre:
         return np.array([[F_L, F_L_error], [A_FB, A_FB_error], [S3, S3_error],\
                          [S4, S4_error], [S5, S5_error], [S7, S7_error], [S8, S8_error],\
                          [S9, S9_error]])
+            
+    def fit_SM_observables_bootstrap(self, data, bootstrap_number=1000):
+        """
+        Fits the 3D PDF (see literature) in all bins with an NLL minimizer and
+        a bootstrapping process.
+
+        Parameters
+        ----------
+        data : ndarray
+            Filtered signal data.
+        bootstrap_number : int, optional
+            Number of bootstrapping samples. The default is 1000.
+
+        Returns
+        -------
+        None
+
+        """
+        # Stores all bootstrapped values of the 8 parameters
+        bootstrap_parameters = np.zeros((len(self._q2_bins), bootstrap_number, 8)).astype("float32")
+        
+        for bin_num in range(len(self._q2_bins)):
+            q_min = self._q2_bins[bin_num][0]
+            q_max = self._q2_bins[bin_num][1]
+            q_filtered = data[q_min < data[:,90]]
+            q_filtered = q_filtered[q_filtered[:,90] < q_max]
+            
+            cos_l = q_filtered[:,92]
+            cos_k = q_filtered[:,93]
+            phi = q_filtered[:,91]
+            acceptance = self.acceptance_func(bin_num, cos_l, cos_k, phi)
+            # Remove negative values because they'll inherently impede an NLL
+            # minimization function (should be avoided, but just in case)
+            positive_vals = acceptance > 0.
+            cos_l = cos_l[positive_vals]
+            cos_k = cos_k[positive_vals]
+            phi = phi[positive_vals]
+            acceptance = acceptance[positive_vals]
+            del positive_vals
+            
+            # Total number of remaining events
+            N = len(cos_l)
+            
+            # Bootstrapping can pick from these with replacement
+            sample_numbers = np.arange(N)
+            
+            for i in range(bootstrap_number):
+                # Pick N random samples with replacement
+                sample_indices = np.random.choice(sample_numbers, N)
+                sample_cos_l = np.zeros(N)
+                sample_cos_k = np.zeros(N)
+                sample_phi = np.zeros(N)
+                sample_acceptance = np.zeros(N)
+                # Populate with bootstrap samples
+                for j, index in enumerate(sample_indices):
+                    sample_cos_l[j] = cos_l[index]
+                    sample_cos_k[j] = cos_k[index]
+                    sample_phi[j] = phi[index]
+                    sample_acceptance[j] = acceptance[index]
+                    
+                cos_squared_k = sample_cos_k**2
+                cos_2l = 2. * sample_cos_l**2 - 1.
+                cos_phi = np.cos(sample_phi)
+                cos_2phi = np.cos(2. * sample_phi)
+                
+                sin_squared_l = 1. - sample_cos_l**2
+                sin_squared_k = 1. - cos_squared_k
+                sin_l = np.sqrt(sin_squared_l)
+                sin_k = np.sqrt(sin_squared_k)
+                sin_2l = 2. * sin_l * sample_cos_l
+                sin_2k = 2. * sin_k * sample_cos_k
+                sin_phi = np.sin(sample_phi)
+                sin_2phi = np.sin(2. * sample_phi)
+                
+                def PDF(F_L, A_FB, S3, S4, S5, S7, S8, S9):
+                    func_vals = 0.75 * (1. - F_L) * sin_squared_k
+                    func_vals += F_L * cos_squared_k
+                    func_vals += 0.25 * (1. - F_L) * sin_squared_k * cos_2l
+                    func_vals -= F_L * cos_squared_k * cos_2l
+                    func_vals += S3 * sin_squared_k * sin_squared_l * cos_2phi
+                    func_vals += S4 * sin_2k * sin_2l * cos_phi
+                    func_vals += S5 * sin_2k * sin_l * cos_phi
+                    func_vals += (4./3.) * A_FB * sin_squared_k * sample_cos_l
+                    func_vals += S7 * sin_2k * sin_l * sin_phi
+                    func_vals += S8 * sin_2k * sin_2l * sin_phi
+                    func_vals += S9 * sin_squared_k * sin_squared_l * sin_2phi
+                    func_vals *= sample_acceptance
+                    return func_vals
+                
+                def PDF_NLL(F_L, A_FB, S3, S4, S5, S7, S8, S9):
+                    func_vals = PDF(F_L, A_FB, S3, S4, S5, S7, S8, S9)
+                    return -1. * np.sum(np.log(func_vals))
+                
+                PDF_NLL.errordef = Minuit.LIKELIHOOD
+                minimizer = Minuit(PDF_NLL, F_L=0.3, A_FB=0., S3=0., S4=0., S5=0., S7=0., S8=0., S9=0.)
+                minimizer.limits=((-1., 1.), (-1., 1.), (-1., 1.), (-1., 1.), (-1., 1.),\
+                                  (-1., 1.), (-1., 1.), (-1., 1.))
+                minimizer.migrad()
+                minimizer.hesse()
+                
+                # Store the fitted parameters
+                F_L = minimizer.values[0]
+                A_FB = minimizer.values[1]
+                S3 = minimizer.values[2]
+                S4 = minimizer.values[3]
+                S5 = minimizer.values[4]
+                S7 = minimizer.values[5]
+                S8 = minimizer.values[6]
+                S9 = minimizer.values[7]
+                
+                values = np.zeros(8)
+                values = np.array([F_L, A_FB, S3, S4, S5, S7, S8, S9])
+                bootstrap_parameters[bin_num, i] += values
+                
+            print("Bin %.i complete (debug purposes)" % (bin_num))
+            
+        # Store the final result for the parameters and errors
+        self._SM_parameters = np.zeros((10, 8))
+        self._SM_parameter_errors = np.zeros((10, 8))
+        
+        # Iterate through each bin to get the needed parameters
+        for i, bin_data in enumerate(bootstrap_parameters):
+            self._SM_parameters[i] += np.mean(bin_data, axis=0)
+            self._SM_parameter_errors[i] += np.std(bin_data, axis=0)
+            
+    def return_SM_observables(self):
+        """
+        Returns fitted SM observables. Must be run after
+        fit_SM_observables_bootstrap()!
+
+        Returns
+        -------
+        DataFrame
+            Array of fitted SM observables in each bin. Rows correspond to bins
+            and columns to observables.
+
+        """
+        variables = ["F_L", "A_FB", "S_3", "S_4", "S_5", "S_7",\
+                           "S_8", "S_9"]
+        return pd.DataFrame(self._SM_parameters, columns=variables)
+    
+    def return_SM_observables_errors(self):
+        """
+        Returns errors on fitted SM observables. Must be run after
+        fit_SM_observables_bootstrap()!
+
+        Returns
+        -------
+        DataFrame
+            Array of errors on fitted SM observables in each bin. Rows correspond
+            to bins and columns to observables.
+
+        """
+        variables = ["F_L", "A_FB", "S_3", "S_4", "S_5", "S_7",\
+                           "S_8", "S_9"]
+        return pd.DataFrame(self._SM_parameter_errors, columns=variables)
+            
+    def plot_SM_observables(self, observable_number, SM_predictions, SM_predictions_errors):
+        """
+        Plots fitted SM observables and SM predictions. The function
+        fit_SM_observables_bootstrap() must be run first!
+
+        Parameters
+        ----------
+        observable_number : int
+            Defines which observable to plot as follows:
+                0 = F_L
+                1 = A_FB
+                2 = S3
+                3 = S4
+                4 = S5
+                5 = S7
+                6 = S8
+                7 = S9
+
+        Returns
+        -------
+        None.
+
+        """
+        parameter_names = ["F_{L}", "A_{FB}", "S_{3}", "S_{4}", "S_{5}", "S_{7}",\
+                           "S_{8}", "S_{9}"]
+        bin_centres = [np.mean(x) for x in self._q2_bins]
+        bin_widths = [0.5 * (x[1] - x[0]) for x in self._q2_bins]
+        
+        name = parameter_names[observable_number]
+        observables = self._SM_parameters[:,observable_number]
+        errors = self._SM_parameter_errors[:,observable_number]
+        
+        plt.title(r"$" + name + "$", fontsize=16)
+        plt.plot(bin_centres, observables, "x", color="blue", ms=10, label=r"$" + name + "$")
+        plt.errorbar(bin_centres, observables, xerr=bin_widths, yerr=errors, color="blue", fmt=".k", capsize=7)
+        
+        # Don't plot the 2 wide bins (they overlap with other bins)
+        predictions = SM_predictions[:,observable_number][:-2]
+        prediction_errors = SM_predictions_errors[:,observable_number][:-2]
+        for i in range(len(predictions) - 1):
+            x = [bin_centres[i] - bin_widths[i], bin_centres[i] + bin_widths[i]]
+            y_1 = [predictions[i] + prediction_errors[i], predictions[i] + prediction_errors[i]]
+            y_2 = [predictions[i] - prediction_errors[i], predictions[i] - prediction_errors[i]]
+            plt.fill_between(x, y_1, y_2, color="red", alpha=0.3)
+            
+        x = [bin_centres[7] - bin_widths[7], bin_centres[7] + bin_widths[7]]
+        y_1 = [predictions[7] + prediction_errors[7], predictions[7] + prediction_errors[7]]
+        y_2 = [predictions[7] - prediction_errors[7], predictions[7] - prediction_errors[7]]
+        plt.fill_between(x, y_1, y_2, color="red", alpha=0.3, label="SM predictions")
+        
+        plt.xlabel(r"$q^{2}$ (GeV$^{2}$/$c^{4}$)")
+        plt.ylabel(r"$" + name + "$")
+        plt.grid(True)
+        plt.legend()
+        plt.show()
