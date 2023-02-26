@@ -651,29 +651,38 @@ class acceptance_legendre:
                            "S_8", "S_9"]
         return pd.DataFrame(self._SM_parameter_errors, columns=variables)
             
-    def plot_SM_observables(self, observable_number, SM_predictions, SM_predictions_errors):
+    def plot_SM_observables(self, observable, SM_predictions, SM_predictions_errors):
         """
         Plots fitted SM observables and SM predictions. The function
         fit_SM_observables_bootstrap() must be run first!
 
         Parameters
         ----------
-        observable_number : int
+        observable : string
             Defines which observable to plot as follows:
-                0 = F_L
-                1 = A_FB
-                2 = S3
-                3 = S4
-                4 = S5
-                5 = S7
-                6 = S8
-                7 = S9
+                F_L
+                A_FB
+                S3
+                S4
+                S5
+                S7
+                S8
+                S9
+                
+        SM_predictions : ndarray or DataFrame
+            SM predictions with rows determining bin number and columns the
+            observables.
+            
+        SM_predictions_errors : ndarray or DataFrame
+            Errors on SM predictions in the same format.
 
         Returns
         -------
         None.
 
         """
+        observables = ["F_L", "A_FB", "S3", "S4", "S5", "S7", "S8", "S9"]
+        observable_number = observables.index(observable)
         parameter_names = ["F_{L}", "A_{FB}", "S_{3}", "S_{4}", "S_{5}", "S_{7}",\
                            "S_{8}", "S_{9}"]
         bin_centres = [np.mean(x) for x in self._q2_bins]
@@ -688,8 +697,10 @@ class acceptance_legendre:
         plt.errorbar(bin_centres, observables, xerr=bin_widths, yerr=errors, color="blue", fmt=".k", capsize=7)
         
         # Don't plot the 2 wide bins (they overlap with other bins)
-        predictions = SM_predictions[:,observable_number][:-2]
-        prediction_errors = SM_predictions_errors[:,observable_number][:-2]
+        predictions = np.array(SM_predictions)
+        predictions_errors = np.array(SM_predictions_errors)
+        predictions = predictions[:,observable_number][:-2]
+        prediction_errors = predictions_errors[:,observable_number][:-2]
         for i in range(len(predictions) - 1):
             x = [bin_centres[i] - bin_widths[i], bin_centres[i] + bin_widths[i]]
             y_1 = [predictions[i] + prediction_errors[i], predictions[i] + prediction_errors[i]]
