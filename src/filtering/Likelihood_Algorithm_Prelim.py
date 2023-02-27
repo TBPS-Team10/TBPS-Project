@@ -34,9 +34,9 @@ unwanted = pd.read_csv('other_decay_channels.csv')
 #%%
 
 # This thing is gigantic so I'll work with a smaller sample
-unwanted = unwanted.sample(50000)
+unwanted = unwanted.sample(100000)
 
-# Modify in final run
+# Modify this line in final run
 
 # The method .sample adds an extra column for some reason?? This doesn't
 # affect the other stuff though so I'll leave it alone
@@ -250,7 +250,7 @@ def calc_log_likelihood(data, normalisations=None,
 #%%
 
 # Gives cutoff for log-likelihoods
-def return_cutoff(normalisations=None, sig=sig, percentile=0.02, variables=[gauss_vars, exp_vars, invexp_vars],
+def return_cutoff(normalisations=None, percentile=0.01, sig=sig, variables=[gauss_vars, exp_vars, invexp_vars],
         parameters=[gauss_params, exp_params, invexp_params]):
     log_likelihoods = calc_log_likelihood(sig, normalisations, variables, parameters)
     sorted_logs = np.sort(log_likelihoods)
@@ -258,12 +258,11 @@ def return_cutoff(normalisations=None, sig=sig, percentile=0.02, variables=[gaus
 
 
 # Count how many were removed
-def count_correctly_removed(cutoff, normalisations=None, unwanted=unwanted, variables=[gauss_vars, exp_vars, invexp_vars],
+def return_passed(cutoff, normalisations=None, unwanted=unwanted, variables=[gauss_vars, exp_vars, invexp_vars],
         parameters=[gauss_params, exp_params, invexp_params]):
     log_likelihoods = calc_log_likelihood(unwanted, normalisations, variables, parameters)
     passed = unwanted[np.where(log_likelihoods>cutoff, True, False)]
-    correct = len(unwanted) - len(passed)
-    return correct
+    return passed
 
 
 #%%
@@ -273,7 +272,7 @@ def count_correctly_removed(cutoff, normalisations=None, unwanted=unwanted, vari
 
 # I am going to hard code in the 2+3+5 parameter list - change if needed
 
-trial_params = np.array([0.4, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05])
+trial_params = np.array([0.7, 0.05, 0.05, 0.05, 0.03, 0.03, 0.03, 0.03, 0.03])
 # Give Kstar a 0.5 weighting and downweight everything else
 
 
@@ -284,30 +283,61 @@ def list_to_normalisations(trial_params):
     return [gauss_weights, exp_weights, invexp_weights]
 
 
-def likelihood_filter(trial_params, sig=sig, percentile=0.03, unwanted=unwanted,
+def likelihood_filter(trial_params, percentile=0.01, sig=sig, unwanted=unwanted,
         variables=[gauss_vars, exp_vars, invexp_vars],
         parameters=[gauss_params, exp_params, invexp_params]):
+    """
+    Filter the dataset, returns data that passes through the filter
+    """
     trial_normalisations = list_to_normalisations(trial_params)
     
     # Predict the cutoff needed
     pred_cutoff = return_cutoff(normalisations=trial_normalisations, sig=sig, percentile=percentile,
             variables=[gauss_vars, exp_vars, invexp_vars], parameters=[gauss_params, exp_params, invexp_params])
-    print(pred_cutoff)
+    #print(pred_cutoff)
     
-    removed = count_correctly_removed(pred_cutoff, normalisations=trial_normalisations,
-            unwanted=unwanted, variables=[gauss_vars, exp_vars, invexp_vars], parameters=[gauss_params, exp_params, invexp_params])
+    passed = return_passed(pred_cutoff, normalisations=trial_normalisations,
+            unwanted=unwanted, variables=[gauss_vars, exp_vars, invexp_vars],
+            parameters=[gauss_params, exp_params, invexp_params])
     
-    return removed
+    return passed
+
+
+def prop_surviving(trial_params, percentile=0.01, sig=sig, unwanted=unwanted,
+        variables=[gauss_vars, exp_vars, invexp_vars],
+        parameters=[gauss_params, exp_params, invexp_params]):
+    """
+    Count proportion that is deleted
+    """
+    passed = likelihood_filter(trial_params, percentile=percentile, sig=sig, unwanted=unwanted,
+        variables=[gauss_vars, exp_vars, invexp_vars],
+        parameters=[gauss_params, exp_params, invexp_params])
+    
+    frac_surviving = len(passed) / len(unwanted)
+    
+    return frac_surviving
+
+
+num_removed = prop_surviving(trial_params)
 
 
 #%%
 
-num_removed = likelihood_filter(trial_params)
-
-# Currently throws out 25% of unwanted decays, vs 3% of signal
-
-
 # Task: optimise the numbers in trial_params
+params_guess = np.array([0.7, 0.05, 0.05, 0.05, 0.03, 0.03, 0.03, 0.03, 0.03])
+
+bestfit = op.minimize(prop_surviving, params_guess, method='Powell', options={"maxiter":50})
+# There is no reason why it's Powell
+
+
+#%%
+
+params_optimized = bestfit.x
+
+print(prop_surviving(params_optimized))
+print(prop_surviving(params_optimized, unwanted=sig))
+
+np.save('params_likelihoodsorter', params_optimized)
 
 
 
