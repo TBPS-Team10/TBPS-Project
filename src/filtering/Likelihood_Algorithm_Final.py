@@ -2,6 +2,12 @@ import numpy as np
 import pandas as pd
 
 
+"""
+If running as some part of other code, import likelihood_filter_final and call:
+    data = likelihood_filter_final(data)
+"""
+
+
 #%%
 
 data_path = r"C:\Users\Yuqing\OneDrive - Imperial College London\Team-Based Problem Solving\TBPS - Spring 2023\\"
@@ -153,12 +159,6 @@ def likelihood_filter_final(data):
     return likelihood_filter(params_optimized, data)
 
 # filtered_data = likelihood_filter_final(unwanted)
-
-"""
-If running as some part of other code, import likelihood_filter
-"""
-
-
 
 
 # -*- coding: utf-8 -*-

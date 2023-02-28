@@ -34,7 +34,7 @@ unwanted = pd.read_csv('other_decay_channels.csv')
 #%%
 
 # This thing is gigantic so I'll work with a smaller sample
-unwanted = unwanted.sample(100000)
+unwanted = unwanted.sample(500000)
 
 # Modify this line in final run
 
@@ -326,8 +326,8 @@ num_removed = prop_surviving(trial_params)
 # Task: optimise the numbers in trial_params
 params_guess = np.array([0.7, 0.05, 0.05, 0.05, 0.03, 0.03, 0.03, 0.03, 0.03])
 
-bestfit = op.minimize(prop_surviving, params_guess, method='Powell', options={"maxiter":50})
-# There is no reason why it's Powell
+bestfit = op.minimize(prop_surviving, params_guess, method='COBYLA', options={"maxiter":100})
+# COBYLA seems to be fastest and gives decent estimates
 
 
 #%%
