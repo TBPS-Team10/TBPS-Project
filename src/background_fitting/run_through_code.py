@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import model_XGB
-import combinatorial_background_angular_fit as cbaf
+import angular_background_Cheb_fits as cbaf
 from acceptance_legendre_background import acceptance_legendre_2
 import Finalised_filters as Ff
 #%%
