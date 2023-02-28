@@ -10,7 +10,8 @@ If running as some part of other code, import likelihood_filter_final and call:
 
 #%%
 
-data_path = r"C:\Users\Yuqing\OneDrive - Imperial College London\Team-Based Problem Solving\TBPS - Spring 2023\\"
+data_path = ".../data/"
+# Check this is the correct path
 
 sig = pd.read_csv(data_path + 'sig.csv')
 
@@ -153,7 +154,7 @@ def prop_surviving(trial_params, data, percentile=0.01, sig=sig,
 # unwanted = pd.read_csv('other_decay_channels.csv')
 
 # print(prop_surviving(params_optimized, data=unwanted))
-# This keeps about 64% of the unwanted dataset
+# This keeps about 65% of the unwanted dataset
 
 def likelihood_filter_final(data):
     return likelihood_filter(params_optimized, data)
