@@ -70,7 +70,7 @@ print(f'length of total dataset after ML filtering is {len(tot_data)}')
 all_bins=cbaf.bin_separation(tot_filtered_data)
 #%%
 # finding all the fits coefficients
-all_fits=cbaf.fit_all_bins(all_bins, 2, force_exp=False,plot=True)
+all_fits=cbaf.fit_all_bins(all_bins, 2,plot=True)
 
 #%%
 
