@@ -33,10 +33,10 @@ print(sns.__version__)  #> 0.9.0
 #%% Violin plot (to show the distribution of a chosen variable for all the datasets)
 
 # Import Data
-df1 = pd.read_csv("data/sig.csv")
-df2 = pd.read_csv("data/total_dataset.csv")
-df3 = pd.read_csv("data/phimumu.csv")
-df4 = pd.read_csv("data/kmumu.csv")
+df1 = pd.read_csv("../data/sig.csv")
+df2 = pd.read_csv("../data/total_dataset.csv")
+df3 = pd.read_csv("../data/phimumu.csv")
+df4 = pd.read_csv("../data/kmumu.csv")
 
 df1.insert(0, 'File Path', 'sig.csv')
 df2.insert(0, 'File Path', 'total_dataset.csv')
