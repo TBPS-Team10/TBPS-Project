@@ -8,6 +8,8 @@ Created on Tue Feb 14 11:46:44 2023
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import Likelihood_Algorithm_Final as laf
+
 
 def cut_IPCHI2_OWNPV(df):
     df.drop(df[(df['B0_IPCHI2_OWNPV'] > 15.996)].index, inplace=True)
@@ -157,3 +159,5 @@ def filter_light(df_signal, df):
     cut_K_mass(df)
     cut_FDCHI(df)
     filter_events_df (df_signal, df)
+    data = laf.likelihood_filter_final(df)
+    return data
