@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+"""
+Created on Sun March 12 2023
+@author: Regen Petu-Stiles
+"""
 # coding: utf-8
 
 # Flavio" is a Python package used for computing observables 
@@ -379,7 +383,7 @@ for i, f in enumerate(fits):
 # In[ ]:
 
 
-#Trying  to get a contour plot # below
+#Trying  to get a contour plot # below - WIP
 
 
 # In[149]:
@@ -466,7 +470,7 @@ get_ipython().run_cell_magic('time', '', "fig=plt.figure(figsize=(4,4))\nx_max=0
 # In[162]:
 
 
-dir(obs_fastfits['ATIm'])
+
 
 
 # In[159]:
