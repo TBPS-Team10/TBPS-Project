@@ -151,6 +151,7 @@ def select(df):
     cut_q2(df)
     
 def filter_light(df_signal, df):
+    cut_q2(df)
     cut_IPCHI2_OWNPV(df)
     cut_PV(df)
     cut_probs (df)
