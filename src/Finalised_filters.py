@@ -39,12 +39,8 @@ def cut_theta_sep(df):
 def cut_DIRA(df):
     df.drop(df[(df['B0_DIRA_OWNPV'] < 0.99990)].index, inplace=True)
 def cut_K_mass(df):
-    mean = np.mean(df['Kstar_M'])
-    sigma = np.std (df['Kstar_M'])
-    lower_range = mean-(5*sigma)
-    upper_range = mean+(5*sigma)
-    df.drop(df[(df['Kstar_M'] < lower_range)].index, inplace=True)
-    df.drop(df[(df['Kstar_M'] > upper_range)].index, inplace=True)
+    df.drop(df[(df['Kstar_M'] < 757.8)].index, inplace=True)
+    df.drop(df[(df['Kstar_M'] > 1054.3)].index, inplace=True)
 def cut_FDCHI(df):
     df.drop(df[(df['B0_FDCHI2_OWNPV'] < 64.084)].index, inplace=True)
     df.drop(df[(df['Kstar_FDCHI2_OWNPV'] < 16.0011)].index, inplace=True)
