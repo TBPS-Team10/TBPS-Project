@@ -158,3 +158,8 @@ def filter_light(df_signal, df):
     filter_events_df (df_signal, df)
     data = laf.likelihood_filter_final(df)
     return data
+def filter_harsh(df_signal, df):
+    select(df)
+    filter_events_df (df_signal, df)
+    data = laf.likelihood_filter_final(df)
+    return data
