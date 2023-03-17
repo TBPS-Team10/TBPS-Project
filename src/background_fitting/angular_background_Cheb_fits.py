@@ -56,45 +56,6 @@ def fit_Chebyshev_2(x,a,b,c):
     
     return fit_polynomial
 
-def fit_Chebyshev_3(x,a,b,c,d):
-
-    func=Chebyshev_polynomial(x,3)
-    fit_polynomial=a*func[0,:]+b*func[1,:]+c*func[2,:]+d*func[3,:]
-    
-    return fit_polynomial
-    
-def fit_Chebyshev_4(x,a,b,c,d,e):
-
-    func=Chebyshev_polynomial(x,4)
-    fit_polynomial=a*func[0,:]+b*func[1,:]+c*func[2,:]+d*func[3,:]+e*func[4,:]
-    
-    return fit_polynomial
-
-def fit_Chebyshev_5(x,a,b,c,d,e,f):
-
-    func=Chebyshev_polynomial(x,5)
-    fit_polynomial=a*func[0,:]+b*func[1,:]+c*func[2,:]+d*func[3,:]+e*func[4,:]+f*func[5,:]
-    
-    return fit_polynomial
-    
-def fit_Chebyshev_6(x,a,b,c,d,e,f,g):
-
-    func=Chebyshev_polynomial(x,6)
-    fit_polynomial=a*func[0,:]+b*func[1,:]+c*func[2,:]+d*func[3,:]+e*func[4,:]+f*func[5,:]+g*func[6,:]
-    
-    return fit_polynomial
-
-def fit_Chebyshev_7(x,a,b,c,d,e,f,g,h):
-
-    func=Chebyshev_polynomial(x,7)
-    fit_polynomial=a*func[0,:]+b*func[1,:]+c*func[2,:]+d*func[3,:]+e*func[4,:]+f*func[5,:]+g*func[6,:]+h*func[7,:]
-    
-    return fit_polynomial
-
-def normalise_phi(phi):
-    # want phi to be comprised between 1 and -1
-    phi_norm=phi/(np.pi)
-    return phi_norm
     
 def bin_mid(bin_edges):
     #return the coordinate of the middle of the bin rather than its edges
@@ -104,27 +65,6 @@ def bin_mid(bin_edges):
     
     return bin_mid
     
-
-def select_Chebyshev_fit(max_order):
-    if max_order==2:
-        fit_Chebyshev=fit_Chebyshev_2
-    if max_order==3:
-        fit_Chebyshev=fit_Chebyshev_3
-    if max_order==4:
-        fit_Chebyshev=fit_Chebyshev_4
-    if max_order==5:
-        fit_Chebyshev=fit_Chebyshev_5
-    if max_order==6:
-        fit_Chebyshev=fit_Chebyshev_6
-    if max_order==7:
-        fit_Chebyshev=fit_Chebyshev_7
-    return fit_Chebyshev  
-
-def find_residuals(y_dat,fit_dat):
-    num_dat=len(y_dat)
-    res=y_dat-fit_dat
-    res2=res**2
-    return np.sum(res2)/num_dat
 
 def plot_fit(angle_data,fit_dat,bins,angular_variable=r'cos$\theta_k$'):
     freq,bin_edges,_=plt.hist(angle_data,bins=bins,density=True)
@@ -141,39 +81,15 @@ def make_fit_Chebyshev(angle_data,max_order):
     x_dat=bin_mid(bin_edges)
     #starting with a flat initial guess and praying for the best
     initial_guess=0.2*np.ones(max_order+1)
-    fit_Chebyshev=select_Chebyshev_fit(max_order)
-    fit_params,cov_params=curve_fit(fit_Chebyshev,x_dat,freq,p0=initial_guess)
-    fit_dat=fit_Chebyshev(x_dat,*fit_params)
-    res_val=find_residuals(freq,fit_dat)
+    fit_params,cov_params=curve_fit(fit_Chebyshev_2,x_dat,freq,p0=initial_guess)
+    fit_dat=fit_Chebyshev_2(x_dat,*fit_params)
     
-    return fit_params, cov_params, fit_dat, res_val
-
-
-def find_best_fit(angle_data,max_order):
-    best_fit_params=0
-    best_cov_params=0
-    best_fit_dat=0
-    best_res_val=1e20
-    best_order=0
-    
-    for i in range(2,max_order+1):
-    
-        fit_params,cov_params,fit_dat,res_val=make_fit_Chebyshev(angle_data,i)
-        if res_val<best_res_val:
-            best_fit_params=fit_params
-            best_cov_params=cov_params
-            best_fit_dat=fit_dat
-            best_res_val=res_val
-            best_order=i
-    
-    return best_fit_params, best_cov_params, best_fit_dat, best_res_val, best_order
-
-
+    return fit_params, cov_params, fit_dat
 
 def make_all_fits(bin_dat,q2bin_num,max_order,plot=False):
-    cosl_vals=find_best_fit(np.array(bin_dat['costhetal']),max_order)
-    cosk_vals=find_best_fit(np.array(bin_dat['costhetak']),max_order)
-    phi_vals=find_best_fit(np.array(bin_dat['phi']),max_order)
+    cosl_vals=make_fit_Chebyshev(np.array(bin_dat['costhetal']),max_order)
+    cosk_vals=make_fit_Chebyshev(np.array(bin_dat['costhetak']),max_order)
+    phi_vals=make_fit_Chebyshev(np.array(bin_dat['phi']),max_order)
     if plot==True:
         plt.figure(q2bin_num)
         plt.subplot(1,3,1)
@@ -185,7 +101,8 @@ def make_all_fits(bin_dat,q2bin_num,max_order,plot=False):
         plt.suptitle(f'background fit for bin {q2bin_num}',fontweight='bold')
         plt.show()
     
-    return cosl_vals, cosk_vals, phi_vals
+    fit_params= cosl_vals, cosk_vals, phi_vals
+    return fit_params
     
 def fit_all_bins(all_bins,max_order,plot=False):
     all_fits=[0]*len(all_bins)
@@ -196,24 +113,36 @@ def fit_all_bins(all_bins,max_order,plot=False):
     return all_fits
 
 
-def create_background_pdf(cosl_vals,cosk_vals,phi_vals,all_fits,bin_num,ang_val=3):
+def create_background_pdf(cosl_vals,cosk_vals,phi_vals,all_fits,bin_num):
 
     #limiting to second order Chebyshev fit because Mitesh said so
     cosl_dist=fit_Chebyshev_2(cosl_vals,all_fits[bin_num][0][0][0],all_fits[bin_num][0][0][1],all_fits[bin_num][0][0][2])
-    #more complex for cosk as it might either be an exponential or a chebyshev
-    
     cosk_dist=fit_Chebyshev_2(cosk_vals,all_fits[bin_num][1][0][0],all_fits[bin_num][1][0][1],all_fits[bin_num][1][0][2])
-    for i in range(0,len(cosk_dist)):
-        if cosk_dist[i]<0: cosk_dist[i]==0
     phi_dist=fit_Chebyshev_2(cosl_vals,all_fits[bin_num][2][0][0],all_fits[bin_num][2][0][1],all_fits[bin_num][2][0][2])
     
+    #set to 0 if pdf gets negative
+    for i in range(0,len(cosk_dist)):
+        if cosl_dist[i]<0: cosk_dist[i]==0
+        if cosk_dist[i]<0: cosk_dist[i]==0
+        if phi_dist[i]<0: phi_dist[i]==0
+        
     return np.array(cosl_dist)*np.array(cosk_dist)*np.array(phi_dist)
 
+def create_background_mesh(cosl_val, cosk_mesh, phi_mesh, all_fits, bin_num):
+    
+    cosl_dist=fit_Chebyshev_2(np.array([cosl_val]),all_fits[bin_num][0][0][0],all_fits[bin_num][0][0][1],all_fits[bin_num][0][0][2])
+    
+    cosk_dist=np.zeros((len(cosk_mesh),len(cosk_mesh)))
+    for i in range(0,len(cosk_mesh)):
+        cosk_dist[:,i]=fit_Chebyshev_2(cosk_mesh[:,i],all_fits[bin_num][1][0][0],all_fits[bin_num][1][0][1],all_fits[bin_num][1][0][2])
+    
+    phi_dist=np.zeros((len(phi_mesh),len(phi_mesh)))
+    for i in range(0,len(phi_mesh)):
+        phi_dist[:,i]=fit_Chebyshev_2(phi_mesh[:,i],all_fits[bin_num][2][0][0],all_fits[bin_num][2][0][1],all_fits[bin_num][2][0][2])
 
-
-
-
-
+    background_PDF=cosl_dist*cosk_dist*phi_dist
+    
+    return background_PDF
 
 
 

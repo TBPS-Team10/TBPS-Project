@@ -12,6 +12,7 @@ import model_XGB
 import angular_background_Cheb_fits as cbaf
 from acceptance_legendre_background import acceptance_legendre_2
 import Finalised_filters as Ff
+from acceptance_new_2 import acceptance_legendre_new_2
 #%%
 # add any additional file names you wish to use. Not using jpsi and psi2S as assuming they are already fully filtered out
 filenames = ["Jpsi_Kstarp_pi0.csv", "jpsi_mu_k_swap.csv",
@@ -89,4 +90,15 @@ for i in range(0,10):
 #%% saving the newly obtained fits
 for i in range (0,10):
     np.savetxt(f'SM_fits_data/SM_fits_bin_{i}.csv',SM_fits[i],delimiter=',')
+
+#%% trying the fits with the new normalisation for bin 0
+sm_fit_func_b=acceptance_legendre_new_2(filtered_acceptance,q2_bins, all_fits, order_costhetal=4, order_costhetak=5, order_phi=6)
+
+guess=[0.3,-0.1,0.01,0.1,0.25,-0.02,-0.002,-0.0007,0.3]
+
+SM_fits_1bin=sm_fit_func_b.fit_SM_observables_integral(tot_dataset_filtered, 0, guess, intervals=140)
+print('SM fits returned')
+
+
+
 

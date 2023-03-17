@@ -8,6 +8,8 @@ Created on Tue Feb 14 11:46:44 2023
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import Likelihood_Algorithm_Final as laf
+
 
 def cut_IPCHI2_OWNPV(df):
     df.drop(df[(df['B0_IPCHI2_OWNPV'] > 15.996)].index, inplace=True)
@@ -37,12 +39,8 @@ def cut_theta_sep(df):
 def cut_DIRA(df):
     df.drop(df[(df['B0_DIRA_OWNPV'] < 0.99990)].index, inplace=True)
 def cut_K_mass(df):
-    mean = np.mean(df['Kstar_M'])
-    sigma = np.std (df['Kstar_M'])
-    lower_range = mean-(5*sigma)
-    upper_range = mean+(5*sigma)
-    df.drop(df[(df['Kstar_M'] < lower_range)].index, inplace=True)
-    df.drop(df[(df['Kstar_M'] > upper_range)].index, inplace=True)
+    df.drop(df[(df['Kstar_M'] < 757.8)].index, inplace=True)
+    df.drop(df[(df['Kstar_M'] > 1054.3)].index, inplace=True)
 def cut_FDCHI(df):
     df.drop(df[(df['B0_FDCHI2_OWNPV'] < 64.084)].index, inplace=True)
     df.drop(df[(df['Kstar_FDCHI2_OWNPV'] < 16.0011)].index, inplace=True)
@@ -149,6 +147,7 @@ def select(df):
     cut_q2(df)
     
 def filter_light(df_signal, df):
+    cut_q2(df)
     cut_IPCHI2_OWNPV(df)
     cut_PV(df)
     cut_probs (df)
@@ -157,3 +156,10 @@ def filter_light(df_signal, df):
     cut_K_mass(df)
     cut_FDCHI(df)
     filter_events_df (df_signal, df)
+    data = laf.likelihood_filter_final(df)
+    return data
+def filter_harsh(df_signal, df):
+    select(df)
+    filter_events_df (df_signal, df)
+    data = laf.likelihood_filter_final(df)
+    return data
